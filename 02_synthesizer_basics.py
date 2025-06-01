@@ -164,8 +164,11 @@ class Synthesizer(DigitalAudio):
         
         # Apply resonance (simplified)
         if resonance > 1.0:
-            # Boost frequencies around cutoff
-            b_peak, a_peak = signal.butter(2, normalized_cutoff, btype='bandpass')
+            # Boost frequencies around cutoff - bandpass needs [low, high] frequencies
+            bandwidth = normalized_cutoff * 0.2  # 20% bandwidth around cutoff
+            low_freq = max(0.01, normalized_cutoff - bandwidth/2)
+            high_freq = min(0.99, normalized_cutoff + bandwidth/2)
+            b_peak, a_peak = signal.butter(2, [low_freq, high_freq], btype='bandpass')
             peak = signal.filtfilt(b_peak, a_peak, audio)
             filtered = filtered + (resonance - 1.0) * 0.3 * peak
         
